@@ -19,6 +19,20 @@ Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powersh
 - **Node.js** ≥ 20 et **pnpm** pour le développement.
 - Aucune dépendance d'exécution externe : l'extension n'utilise que les API natives de VS Code.
 
+## Installation
+
+L'extension se distribue via les **GitHub Releases** (pas le Marketplace).
+
+1. Télécharge le dernier `markdown-run-<version>.vsix` depuis la page [Releases](https://github.com/JoanyBuclon/Markdown-Run/releases).
+2. Installe-le, au choix :
+   - **En ligne de commande** :
+     ```bash
+     code --install-extension markdown-run-<version>.vsix
+     ```
+   - **Depuis VS Code** : vue *Extensions* → menu `···` → **Install from VSIX…** → sélectionne le fichier.
+
+Pour mettre à jour, installe simplement le `.vsix` d'une version plus récente (ajoute `--force` en ligne de commande pour réinstaller par-dessus).
+
 ## Extension Settings
 
 L'extension contribue aux réglages suivants (via `contributes.configuration`) :
