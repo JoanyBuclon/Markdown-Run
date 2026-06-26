@@ -1,8 +1,10 @@
+import type MarkdownIt from 'markdown-it';
 import * as vscode from 'vscode';
 import { findCodeBlockAtPosition } from './codeBlocks';
 import { MarkdownRunCodeLensProvider } from './codeLensProvider';
 import { copyBlock, runBlock } from './commands';
 import { getDocumentLanguages, isDocumentLanguage, isLanguageEnabled } from './config';
+import { extendMarkdownItForPreview } from './preview/markdownItPlugin';
 
 // Called when the extension is activated (on startup or when a Markdown file is opened).
 export function activate(context: vscode.ExtensionContext) {
@@ -37,6 +39,13 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}),
 	);
+
+	// Consumed by the built-in Markdown extension to extend the preview renderer.
+	return {
+		extendMarkdownIt(md: MarkdownIt): MarkdownIt {
+			return extendMarkdownItForPreview(md);
+		},
+	};
 }
 
 /**

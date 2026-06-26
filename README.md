@@ -2,16 +2,16 @@
 
 Extension VS Code qui ajoute deux actions sur les blocs de code shell d'un fichier Markdown : **copier** le contenu en un clic, et **exécuter** le contenu dans le terminal intégré de VS Code.
 
-Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powershell`, à la fois dans **l'éditeur** (via CodeLens) et dans **l'aperçu Markdown** (boutons dans le rendu).
+Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powershell`, dans **l'éditeur** (via CodeLens) et, pour la copie, dans **l'aperçu Markdown**.
 
 ## Features
 
-- 📋 **Copier**: copie le contenu brut du bloc dans le presse-papiers (`vscode.env.clipboard`).
-- ▶️ **Exécuter**: envoie le contenu du bloc dans le terminal intégré et l'exécute (`terminal.sendText`).
+- 📋 **Copier**: copie le contenu brut du bloc dans le presse-papiers (`vscode.env.clipboard`). Disponible dans l'éditeur **et** dans l'aperçu.
+- ▶️ **Exécuter**: envoie le contenu du bloc dans le terminal intégré et l'exécute (`terminal.sendText`). Disponible dans l'éditeur.
 - Détection automatique des blocs ` ```sh `, ` ```bash ` et ` ```powershell `.
-- Deux points d'accès, partageant les mêmes commandes :
-  - **CodeLens** : liens cliquables juste au-dessus de chaque bloc, dans le fichier en édition.
-  - **Aperçu Markdown** : boutons injectés dans le rendu de l'aperçu.
+- Deux points d'accès :
+  - **CodeLens** (éditeur) : liens **Copy** / **Run** au-dessus de chaque bloc, dans le fichier en édition.
+  - **Aperçu Markdown** : bouton **Copy** au survol du bloc rendu. (Pas de **Run** dans l'aperçu — voir [Known Issues](#known-issues).)
 
 ## Requirements
 
@@ -23,15 +23,15 @@ Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powersh
 
 L'extension contribue aux réglages suivants (via `contributes.configuration`) :
 
-| Réglage                     | Type       | Défaut                         | Description                                                                                                                                                  |
-| --------------------------- | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `markdownRun.documentLanguages` | `string[]` | `["markdown"]`             | Modes de langage des documents sur lesquels les actions s'appliquent. Ajoute d'autres ids (ex. `"mdx"`) pour les activer ailleurs.                          |
-| `markdownRun.autoExecute`   | `boolean`  | `true`                         | Si activé, « Exécuter » lance la commande automatiquement (envoi + `Entrée`). Si désactivé, le texte est seulement inséré dans le terminal, sans l'exécuter. |
-| `markdownRun.languages`     | `string[]` | `["sh", "bash", "powershell"]` | Langages de blocs sur lesquels afficher les actions. Laisser vide pour les afficher sur **tous** les blocs de code.                                          |
-| `markdownRun.showInEditor`  | `boolean`  | `true`                         | Affiche les CodeLens dans l'éditeur.                                                                                                                         |
-| `markdownRun.showInPreview` | `boolean`  | `true`                         | Affiche les boutons dans l'aperçu Markdown.                                                                                                                  |
+| Réglage                         | Type       | Défaut                         | Description                                                                                                                                                  |
+| ------------------------------- | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `markdownRun.documentLanguages` | `string[]` | `["markdown", "mdc"]`          | Modes de langage des documents sur lesquels les actions s'appliquent (markdown + MDC/Nuxt Content). Ajoute d'autres ids (ex. `"mdx"`) pour les activer ailleurs. |
+| `markdownRun.autoExecute`       | `boolean`  | `true`                         | Si activé, « Exécuter » lance la commande automatiquement (envoi + `Entrée`). Si désactivé, le texte est seulement inséré dans le terminal, sans l'exécuter. |
+| `markdownRun.languages`         | `string[]` | `["sh", "bash", "powershell"]` | Langages de blocs sur lesquels afficher les actions. Laisser vide pour les afficher sur **tous** les blocs de code.                                          |
+| `markdownRun.showInEditor`      | `boolean`  | `true`                         | Affiche les CodeLens dans l'éditeur.                                                                                                                         |
+| `markdownRun.showInPreview`     | `boolean`  | `true`                         | Affiche le bouton Copy dans l'aperçu Markdown.                                                                                                              |
 
-> ⚠️ **Sécurité** : avec `autoExecute` activé (défaut), un bloc est exécuté tel quel dès le clic, sans confirmation. Vérifie toujours le contenu d'un bloc provenant d'une source non fiable. Désactive `markdownRun.autoExecute` pour relire avant d'exécuter.
+⚠️ **Sécurité** : avec `autoExecute` activé (défaut), un bloc est exécuté tel quel dès le clic, sans confirmation. Vérifie toujours le contenu d'un bloc provenant d'une source non fiable. Désactive `markdownRun.autoExecute` pour relire avant d'exécuter.
 
 ## Architecture technique
 
@@ -44,7 +44,7 @@ L'extension contribue aux réglages suivants (via `contributes.configuration`) :
 | API « copier »          | `vscode.env.clipboard.writeText`                                                                                      |
 | API « exécuter »        | `vscode.window.createTerminal` + `terminal.sendText`                                                                  |
 | Actions éditeur         | `vscode.languages.registerCodeLensProvider`                                                                           |
-| Actions aperçu          | contribution `markdown.markdownItPlugins` (injection des boutons) + `markdown.previewScripts` (clics → `postMessage`) |
+| Action aperçu (Copy)    | `markdown.markdownItPlugins` (injection du bouton) + `markdown.previewScripts` (copie côté client via `navigator.clipboard`) + `markdown.previewStyles` |
 | Tests                   | `@vscode/test-cli` + `@vscode/test-electron`                                                                          |
 | Lint                    | ESLint                                                                                                                |
 
@@ -53,10 +53,11 @@ L'extension contribue aux réglages suivants (via `contributes.configuration`) :
 ```
 Fichier .md
    │
-   ├── Éditeur ──> CodeLensProvider ──┐
-   │                                  ├──> commande markdownRun.copy ──> clipboard
-   └── Aperçu ──> markdown-it plugin  │
-                  + previewScript ────┴──> commande markdownRun.run  ──> terminal.sendText
+   ├── Éditeur ──> CodeLensProvider ──> commandes markdownRun.copy / markdownRun.run
+   │                                       │                    │
+   │                                  clipboard          terminal.sendText
+   │
+   └── Aperçu ──> markdown-it plugin (bouton Copy) ──> previewScript ──> navigator.clipboard
 ```
 
 ## Développement
@@ -77,27 +78,30 @@ pnpm dlx @vscode/vsce package          # génère markdown-run-x.y.z.vsix
 code --install-extension markdown-run-*.vsix
 ```
 
-### Structure du projet (prévue)
+### Structure du projet
 
 ```
 .
 ├── package.json            # manifeste (contributes, commandes, config)
 ├── tsconfig.json
 ├── esbuild.js              # script de bundling
+├── media/                  # assets chargés tels quels dans la webview de l'aperçu
+│   ├── preview.js          # script côté aperçu : bouton Copy (clipboard)
+│   └── preview.css         # style de la barre d'actions de l'aperçu
 ├── src/
-│   ├── extension.ts        # point d'entrée : activate() / deactivate()
-│   ├── codeBlocks.ts       # parsing des blocs de code shell du document
-│   ├── codeLensProvider.ts # CodeLens dans l'éditeur
+│   ├── extension.ts        # point d'entrée : activate() / deactivate() + API extendMarkdownIt
+│   ├── config.ts           # lecture des réglages markdownRun.*
+│   ├── codeBlocks.ts       # parsing des blocs de code du document
+│   ├── codeLensProvider.ts # CodeLens Copy / Run dans l'éditeur
 │   ├── commands.ts         # implémentation de copy / run
 │   └── preview/
-│       ├── markdownItPlugin.ts  # injection des boutons dans le rendu
-│       └── previewScript.ts     # script côté webview de l'aperçu
+│       └── markdownItPlugin.ts  # injection du bouton Copy dans le rendu de l'aperçu
 └── README.md
 ```
 
 ## Known Issues
 
-- Aucune pour l'instant (extension en cours de développement initial).
+- **Pas de bouton « Run » dans l'aperçu Markdown.** L'aperçu intégré ignore les liens `command:` (sécurité), et un script d'aperçu ne peut pas communiquer avec l'extension. L'exécution n'est donc proposée que via le CodeLens de l'éditeur. La copie, elle, fonctionne dans l'aperçu (côté client).
 
 ## Release Notes
 

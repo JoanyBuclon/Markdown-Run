@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onLanguage:markdown",
+    "onLanguage:mdc",
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
@@ -36,9 +37,10 @@
             "type": "string"
           },
           "default": [
-            "markdown"
+            "markdown",
+            "mdc"
           ],
-          "description": "Editor language modes the actions apply to. Defaults to Markdown; add other language ids (e.g. \"mdx\") to enable the actions in those documents too."
+          "description": "Editor language modes the actions apply to. Defaults to Markdown and MDC (Nuxt Content); add other language ids (e.g. \"mdx\") to enable the actions in those documents too."
         },
         "markdownRun.autoExecute": {
           "type": "boolean",
@@ -65,10 +67,17 @@
         "markdownRun.showInPreview": {
           "type": "boolean",
           "default": true,
-          "description": "Show the action buttons on code blocks in the Markdown preview."
+          "description": "Show the Copy button on code blocks in the Markdown preview."
         }
       }
-    }
+    },
+    "markdown.markdownItPlugins": true,
+    "markdown.previewScripts": [
+      "./media/preview.js"
+    ],
+    "markdown.previewStyles": [
+      "./media/preview.css"
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
@@ -86,6 +95,7 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.96.0",
+    "@types/markdown-it": "^14.1.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
     "typescript-eslint": "^8.61.1",

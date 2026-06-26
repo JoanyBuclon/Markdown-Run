@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 const SECTION = 'markdownRun';
 const DEFAULT_LANGUAGES = ['sh', 'bash', 'powershell'];
-const DEFAULT_DOCUMENT_LANGUAGES = ['markdown'];
+const DEFAULT_DOCUMENT_LANGUAGES = ['markdown', 'mdc'];
 
 function config(): vscode.WorkspaceConfiguration {
 	return vscode.workspace.getConfiguration(SECTION);

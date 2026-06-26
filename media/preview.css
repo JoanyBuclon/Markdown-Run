@@ -1,0 +1,40 @@
+.markdown-run-block {
+	position: relative;
+}
+
+.markdown-run-toolbar {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: flex;
+	gap: 4px;
+	opacity: 0;
+	transition: opacity 0.1s ease-in-out;
+}
+
+.markdown-run-block:hover .markdown-run-toolbar,
+.markdown-run-toolbar:focus-within {
+	opacity: 1;
+}
+
+.markdown-run-copy {
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	line-height: 1;
+	padding: 4px 8px;
+	border: 1px solid var(--vscode-button-border, transparent);
+	border-radius: 4px;
+	background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.2));
+	color: var(--vscode-button-secondaryForeground, inherit);
+	cursor: pointer;
+	user-select: none;
+}
+
+.markdown-run-copy:hover {
+	background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.35));
+}
+
+.markdown-run-copied {
+	background: var(--vscode-button-background, rgba(128, 128, 128, 0.35));
+	color: var(--vscode-button-foreground, inherit);
+}
