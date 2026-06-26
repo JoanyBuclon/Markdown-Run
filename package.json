@@ -3,6 +3,7 @@
   "displayName": "Markdown Run",
   "description": "Copy & run shell code blocks from Markdown",
   "version": "0.0.1",
+  "publisher": "Joany Buclon",
   "engines": {
     "vscode": "^1.96.0"
   },
