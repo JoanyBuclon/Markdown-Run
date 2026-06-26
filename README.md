@@ -4,50 +4,26 @@ Extension VS Code qui ajoute deux actions sur les blocs de code shell d'un fichi
 
 Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powershell`, à la fois dans **l'éditeur** (via CodeLens) et dans **l'aperçu Markdown** (boutons dans le rendu).
 
-## Fonctionnalités
+## Features
 
-- 📋 **Copier** — copie le contenu brut du bloc dans le presse-papiers.
-- ▶️ **Exécuter** — envoie le contenu du bloc dans le terminal intégré et l'exécute.
+- 📋 **Copier** — copie le contenu brut du bloc dans le presse-papiers (`vscode.env.clipboard`).
+- ▶️ **Exécuter** — envoie le contenu du bloc dans le terminal intégré et l'exécute (`terminal.sendText`).
 - Détection automatique des blocs ` ```sh `, ` ```bash ` et ` ```powershell `.
-- Deux points d'accès :
+- Deux points d'accès, partageant les mêmes commandes :
   - **CodeLens** : liens cliquables juste au-dessus de chaque bloc, dans le fichier en édition.
   - **Aperçu Markdown** : boutons injectés dans le rendu de l'aperçu.
 
-## Démo
+> _(Captures / GIF à ajouter ici une fois l'extension fonctionnelle — chemins relatifs à ce README, ex. `images/feature-run.gif`.)_
 
-> _(captures / GIF à ajouter une fois l'extension fonctionnelle)_
+## Requirements
 
-## Installation
+- **VS Code** `^1.125.0` (défini dans `engines.vscode`).
+- **Node.js** ≥ 20 et **pnpm** pour le développement.
+- Aucune dépendance d'exécution externe : l'extension n'utilise que les API natives de VS Code.
 
-### Depuis le code source (développement)
+## Extension Settings
 
-```bash
-git clone <url-du-repo>
-cd "Markdown Run"
-npm install
-```
-
-Puis dans VS Code : ouvrir le dossier et appuyer sur `F5` pour lancer une fenêtre _Extension Development Host_ avec l'extension chargée.
-
-### Depuis un paquet `.vsix`
-
-```bash
-npm run package        # génère un fichier markdown-run-x.y.z.vsix
-code --install-extension markdown-run-*.vsix
-```
-
-## Utilisation
-
-1. Ouvrir un fichier `.md` contenant un bloc de code shell :
-
-   ```sh
-   echo "Bonjour depuis Markdown Run"
-   ```
-
-2. **Dans l'éditeur** : cliquer sur `▶ Exécuter` ou `📋 Copier` affiché au-dessus du bloc.
-3. **Dans l'aperçu** (`Ctrl+Shift+V`) : cliquer sur les boutons affichés sur le bloc rendu.
-
-## Configuration
+L'extension contribue aux réglages suivants (via `contributes.configuration`) :
 
 | Réglage | Type | Défaut | Description |
 | --- | --- | --- | --- |
@@ -57,7 +33,7 @@ code --install-extension markdown-run-*.vsix
 | `markdownRun.showInEditor` | `boolean` | `true` | Affiche les CodeLens dans l'éditeur. |
 | `markdownRun.showInPreview` | `boolean` | `true` | Affiche les boutons dans l'aperçu Markdown. |
 
-> ⚠️ **Sécurité** : avec `autoExecute` activé (défaut), un bloc de code est exécuté tel quel dès le clic, sans confirmation. Vérifie toujours le contenu d'un bloc provenant d'une source non fiable. Désactive `markdownRun.autoExecute` pour relire avant d'exécuter.
+> ⚠️ **Sécurité** : avec `autoExecute` activé (défaut), un bloc est exécuté tel quel dès le clic, sans confirmation. Vérifie toujours le contenu d'un bloc provenant d'une source non fiable. Désactive `markdownRun.autoExecute` pour relire avant d'exécuter.
 
 ## Architecture technique
 
@@ -66,10 +42,11 @@ code --install-extension markdown-run-*.vsix
 | Langage | TypeScript |
 | Scaffolding | `yo code` (générateur officiel `generator-code`) |
 | Bundler | esbuild |
+| Gestionnaire de paquets | pnpm |
 | API « copier » | `vscode.env.clipboard.writeText` |
 | API « exécuter » | `vscode.window.createTerminal` + `terminal.sendText` |
 | Actions éditeur | `vscode.languages.registerCodeLensProvider` |
-| Actions aperçu | contribution `markdown.markdownItPlugins` (injection des boutons) + `markdown.previewScripts` (gestion des clics → `postMessage`) |
+| Actions aperçu | contribution `markdown.markdownItPlugins` (injection des boutons) + `markdown.previewScripts` (clics → `postMessage`) |
 | Tests | `@vscode/test-cli` + `@vscode/test-electron` |
 | Lint | ESLint |
 
@@ -84,13 +61,29 @@ Fichier .md
                   + previewScript ────┴──> commande markdownRun.run  ──> terminal.sendText
 ```
 
-Les deux points d'accès partagent les mêmes commandes `markdownRun.copy` et `markdownRun.run`.
+## Développement
 
-## Structure du projet (prévue)
+```bash
+pnpm install         # installe les dépendances
+pnpm run watch       # compilation incrémentale (esbuild + tsc)
+# F5 dans VS Code    # lance l'Extension Development Host
+pnpm run lint        # ESLint
+pnpm test            # tests (vscode-test)
+pnpm run package     # build de production
+```
+
+Pour générer un paquet installable :
+
+```bash
+pnpm dlx @vscode/vsce package          # génère markdown-run-x.y.z.vsix
+code --install-extension markdown-run-*.vsix
+```
+
+### Structure du projet (prévue)
 
 ```
 .
-├── package.json            # manifeste de l'extension (contributes, commandes, config)
+├── package.json            # manifeste (contributes, commandes, config)
 ├── tsconfig.json
 ├── esbuild.js              # script de bundling
 ├── src/
@@ -104,22 +97,28 @@ Les deux points d'accès partagent les mêmes commandes `markdownRun.copy` et `m
 └── README.md
 ```
 
-## Développement
+## Known Issues
 
-```bash
-npm install          # installe les dépendances
-npm run watch        # compilation incrémentale
-# F5 dans VS Code    # lance l'Extension Development Host
-npm run lint         # ESLint
-npm test             # tests
-npm run package      # génère le .vsix (via @vscode/vsce)
-```
+- Aucune pour l'instant (extension en cours de développement initial).
 
-## Compatibilité
+## Release Notes
 
-- VS Code `^1.90.0` (à ajuster selon les API utilisées).
-- Multiplateforme : Windows (PowerShell), macOS / Linux (sh/bash).
+### 0.0.1
 
-## Licence
+- Mise en place du projet (scaffold, choix techniques, documentation).
 
-MIT _(à confirmer)_
+## Following extension guidelines
+
+Ce projet suit les bonnes pratiques officielles :
+
+- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+
+## For more information
+
+- [VS Code Extension API](https://code.visualstudio.com/api)
+- [CodeLens Provider](https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider)
+- [Markdown extension API](https://code.visualstudio.com/api/extension-guides/markdown-extension)
+
+## License
+
+[MIT](LICENSE)
