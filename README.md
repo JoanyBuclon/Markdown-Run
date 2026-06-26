@@ -105,9 +105,15 @@ code --install-extension markdown-run-*.vsix
 
 ## Release Notes
 
-### 0.0.1
+### 0.1.0 — 2026-06-26
 
-- Mise en place du projet (scaffold, choix techniques, documentation).
+Première version fonctionnelle.
+
+- Actions **Copy** et **Run** sur les blocs `sh` / `bash` / `powershell` dans l'éditeur (CodeLens au-dessus de chaque bloc).
+- Bouton **Copy** sur les blocs de code dans l'aperçu Markdown (copie côté client).
+- 5 réglages : `documentLanguages`, `languages`, `autoExecute`, `showInEditor`, `showInPreview`.
+- `languages` vide = actions sur **tous** les blocs ; fonctionne sur les modes `markdown` **et** `mdc` (Nuxt Content) par défaut.
+- Icône de l'extension.
 
 ## Following extension guidelines
 

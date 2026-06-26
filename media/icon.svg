@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="2" y="2" width="124" height="124" rx="26" fill="#15171C" stroke="#2A2D34" stroke-width="2"/>
+
+  <!-- Markdown mark: white "M" + down triangle -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 18 80 L 18 40 L 38 62 L 58 40 L 58 80"/>
+  </g>
+  <path d="M 26 84 L 50 84 L 38 100 Z" fill="#FFFFFF"/>
+
+  <!-- Subtle divider -->
+  <line x1="68" y1="34" x2="68" y2="100" stroke="#2A2D34" stroke-width="2"/>
+
+  <!-- Terminal prompt: green ">" + "_" cursor -->
+  <path d="M 80 46 L 98 67 L 80 88" fill="none" stroke="#23D18B" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="86" y="84" width="26" height="7" rx="3" fill="#23D18B"/>
+</svg>

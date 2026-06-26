@@ -4,7 +4,7 @@ All notable changes to the "Markdown Run" extension are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [0.1.0] - 2026-06-26
 
 ### Added
 
