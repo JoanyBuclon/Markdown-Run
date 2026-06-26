@@ -6,18 +6,16 @@ Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powersh
 
 ## Features
 
-- 📋 **Copier** — copie le contenu brut du bloc dans le presse-papiers (`vscode.env.clipboard`).
-- ▶️ **Exécuter** — envoie le contenu du bloc dans le terminal intégré et l'exécute (`terminal.sendText`).
+- 📋 **Copier**: copie le contenu brut du bloc dans le presse-papiers (`vscode.env.clipboard`).
+- ▶️ **Exécuter**: envoie le contenu du bloc dans le terminal intégré et l'exécute (`terminal.sendText`).
 - Détection automatique des blocs ` ```sh `, ` ```bash ` et ` ```powershell `.
 - Deux points d'accès, partageant les mêmes commandes :
   - **CodeLens** : liens cliquables juste au-dessus de chaque bloc, dans le fichier en édition.
   - **Aperçu Markdown** : boutons injectés dans le rendu de l'aperçu.
 
-> _(Captures / GIF à ajouter ici une fois l'extension fonctionnelle — chemins relatifs à ce README, ex. `images/feature-run.gif`.)_
-
 ## Requirements
 
-- **VS Code** `^1.125.0` (défini dans `engines.vscode`).
+- **VS Code** `^1.96.0` (défini dans `engines.vscode`).
 - **Node.js** ≥ 20 et **pnpm** pour le développement.
 - Aucune dépendance d'exécution externe : l'extension n'utilise que les API natives de VS Code.
 
@@ -25,30 +23,30 @@ Les actions apparaissent sur les blocs de code marqués `sh`, `bash` ou `powersh
 
 L'extension contribue aux réglages suivants (via `contributes.configuration`) :
 
-| Réglage | Type | Défaut | Description |
-| --- | --- | --- | --- |
-| `markdownRun.autoExecute` | `boolean` | `true` | Si activé, « Exécuter » lance la commande automatiquement (envoi + `Entrée`). Si désactivé, le texte est seulement inséré dans le terminal, sans l'exécuter — l'utilisateur valide manuellement. |
-| `markdownRun.languages` | `string[]` | `["sh", "bash", "powershell"]` | Langages de blocs sur lesquels afficher les actions. |
-| `markdownRun.reuseTerminal` | `boolean` | `true` | Réutilise un terminal dédié « Markdown Run » au lieu d'en créer un nouveau à chaque exécution. |
-| `markdownRun.showInEditor` | `boolean` | `true` | Affiche les CodeLens dans l'éditeur. |
-| `markdownRun.showInPreview` | `boolean` | `true` | Affiche les boutons dans l'aperçu Markdown. |
+| Réglage                     | Type       | Défaut                         | Description                                                                                                                                                  |
+| --------------------------- | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `markdownRun.documentLanguages` | `string[]` | `["markdown"]`             | Modes de langage des documents sur lesquels les actions s'appliquent. Ajoute d'autres ids (ex. `"mdx"`) pour les activer ailleurs.                          |
+| `markdownRun.autoExecute`   | `boolean`  | `true`                         | Si activé, « Exécuter » lance la commande automatiquement (envoi + `Entrée`). Si désactivé, le texte est seulement inséré dans le terminal, sans l'exécuter. |
+| `markdownRun.languages`     | `string[]` | `["sh", "bash", "powershell"]` | Langages de blocs sur lesquels afficher les actions. Laisser vide pour les afficher sur **tous** les blocs de code.                                          |
+| `markdownRun.showInEditor`  | `boolean`  | `true`                         | Affiche les CodeLens dans l'éditeur.                                                                                                                         |
+| `markdownRun.showInPreview` | `boolean`  | `true`                         | Affiche les boutons dans l'aperçu Markdown.                                                                                                                  |
 
 > ⚠️ **Sécurité** : avec `autoExecute` activé (défaut), un bloc est exécuté tel quel dès le clic, sans confirmation. Vérifie toujours le contenu d'un bloc provenant d'une source non fiable. Désactive `markdownRun.autoExecute` pour relire avant d'exécuter.
 
 ## Architecture technique
 
-| Domaine | Choix |
-| --- | --- |
-| Langage | TypeScript |
-| Scaffolding | `yo code` (générateur officiel `generator-code`) |
-| Bundler | esbuild |
-| Gestionnaire de paquets | pnpm |
-| API « copier » | `vscode.env.clipboard.writeText` |
-| API « exécuter » | `vscode.window.createTerminal` + `terminal.sendText` |
-| Actions éditeur | `vscode.languages.registerCodeLensProvider` |
-| Actions aperçu | contribution `markdown.markdownItPlugins` (injection des boutons) + `markdown.previewScripts` (clics → `postMessage`) |
-| Tests | `@vscode/test-cli` + `@vscode/test-electron` |
-| Lint | ESLint |
+| Domaine                 | Choix                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Langage                 | TypeScript                                                                                                            |
+| Scaffolding             | `yo code` (générateur officiel `generator-code`)                                                                      |
+| Bundler                 | esbuild                                                                                                               |
+| Gestionnaire de paquets | pnpm                                                                                                                  |
+| API « copier »          | `vscode.env.clipboard.writeText`                                                                                      |
+| API « exécuter »        | `vscode.window.createTerminal` + `terminal.sendText`                                                                  |
+| Actions éditeur         | `vscode.languages.registerCodeLensProvider`                                                                           |
+| Actions aperçu          | contribution `markdown.markdownItPlugins` (injection des boutons) + `markdown.previewScripts` (clics → `postMessage`) |
+| Tests                   | `@vscode/test-cli` + `@vscode/test-electron`                                                                          |
+| Lint                    | ESLint                                                                                                                |
 
 ### Flux
 
@@ -118,7 +116,3 @@ Ce projet suit les bonnes pratiques officielles :
 - [VS Code Extension API](https://code.visualstudio.com/api)
 - [CodeLens Provider](https://code.visualstudio.com/api/references/vscode-api#CodeLensProvider)
 - [Markdown extension API](https://code.visualstudio.com/api/extension-guides/markdown-extension)
-
-## License
-
-[MIT](LICENSE)

@@ -1,26 +1,97 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { findCodeBlockAtPosition } from './codeBlocks';
+import { MarkdownRunCodeLensProvider } from './codeLensProvider';
+import { copyBlock, runBlock } from './commands';
+import { getDocumentLanguages, isDocumentLanguage, isLanguageEnabled } from './config';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+// Called when the extension is activated (on startup or when a Markdown file is opened).
 export function activate(context: vscode.ExtensionContext) {
+	const codeLensProvider = new MarkdownRunCodeLensProvider();
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "markdown-run" is now active!');
+	// The CodeLens selector is fixed at registration time, so a change to the
+	// configured document languages requires re-registering the provider.
+	let codeLensRegistration = registerCodeLens(codeLensProvider);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('markdown-run.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from markdown-run!');
-	});
-
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(
+		codeLensProvider,
+		{ dispose: () => codeLensRegistration.dispose() },
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration('markdownRun.documentLanguages')) {
+				codeLensRegistration.dispose();
+				codeLensRegistration = registerCodeLens(codeLensProvider);
+			}
+			if (event.affectsConfiguration('markdownRun')) {
+				codeLensProvider.refresh();
+			}
+		}),
+		vscode.commands.registerCommand('markdownRun.copy', (content?: string) => {
+			const text = resolveContent(content);
+			if (text !== undefined) {
+				return copyBlock(text);
+			}
+		}),
+		vscode.commands.registerCommand('markdownRun.run', (content?: string) => {
+			const text = resolveContent(content);
+			if (text !== undefined) {
+				runBlock(text);
+			}
+		}),
+	);
 }
 
-// This method is called when your extension is deactivated
+/**
+ * Resolve the code block content for a command invocation.
+ *
+ * CodeLens and the Markdown preview pass the content directly. When the command
+ * is invoked from the Command Palette there is no argument, so we fall back to
+ * the enabled code block under the cursor.
+ */
+function resolveContent(content?: string): string | undefined {
+	if (typeof content === 'string') {
+		return content;
+	}
+
+	const editor = activeMarkdownEditor();
+	if (!editor) {
+		vscode.window.showWarningMessage(
+			'Markdown Run: open a Markdown file and place the cursor in a code block.',
+		);
+		return undefined;
+	}
+
+	const block = findCodeBlockAtPosition(editor.document, editor.selection.active);
+	if (!block || !isLanguageEnabled(block.language)) {
+		vscode.window.showWarningMessage(
+			'Markdown Run: place the cursor inside a sh, bash or powershell code block.',
+		);
+		return undefined;
+	}
+
+	return block.content;
+}
+
+/**
+ * Find a Markdown editor to act on. Prefer the active editor, but fall back to a
+ * visible one: when the terminal, preview or another panel has focus,
+ * `activeTextEditor` is undefined even though the Markdown file is still open.
+ */
+function activeMarkdownEditor(): vscode.TextEditor | undefined {
+	const active = vscode.window.activeTextEditor;
+	if (active && isDocumentLanguage(active.document.languageId)) {
+		return active;
+	}
+	return vscode.window.visibleTextEditors.find((editor) =>
+		isDocumentLanguage(editor.document.languageId),
+	);
+}
+
+/** Register the CodeLens provider for the configured document languages. */
+function registerCodeLens(provider: vscode.CodeLensProvider): vscode.Disposable {
+	const selector: vscode.DocumentSelector = getDocumentLanguages().map((language) => ({
+		language,
+	}));
+	return vscode.languages.registerCodeLensProvider(selector, provider);
+}
+
+// Called when the extension is deactivated.
 export function deactivate() {}

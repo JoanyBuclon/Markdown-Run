@@ -1,23 +1,74 @@
 {
   "name": "markdown-run",
-  "displayName": "markdown-run",
+  "displayName": "Markdown Run",
   "description": "Copy & run shell code blocks from Markdown",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.125.0"
+    "vscode": "^1.96.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "markdown-run.helloWorld",
-        "title": "Hello World"
+        "command": "markdownRun.copy",
+        "title": "Copy code block",
+        "category": "Markdown Run"
+      },
+      {
+        "command": "markdownRun.run",
+        "title": "Run code block in terminal",
+        "category": "Markdown Run"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Markdown Run",
+      "properties": {
+        "markdownRun.documentLanguages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "markdown"
+          ],
+          "description": "Editor language modes the actions apply to. Defaults to Markdown; add other language ids (e.g. \"mdx\") to enable the actions in those documents too."
+        },
+        "markdownRun.autoExecute": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When enabled, \"Run\" executes the command automatically (sends the text followed by `Enter`). When disabled, the text is only inserted into the terminal without running it, so you can review and run it manually.\n\n⚠️ With this enabled, a code block runs as-is on click, without confirmation."
+        },
+        "markdownRun.languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "sh",
+            "bash",
+            "powershell"
+          ],
+          "description": "Code block languages on which the \"Copy\" and \"Run\" actions are shown. Leave empty to show them on every code block."
+        },
+        "markdownRun.showInEditor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the actions (CodeLens) above code blocks in the editor."
+        },
+        "markdownRun.showInPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the action buttons on code blocks in the Markdown preview."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
@@ -34,7 +85,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.125.0",
+    "@types/vscode": "^1.96.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
     "typescript-eslint": "^8.61.1",
